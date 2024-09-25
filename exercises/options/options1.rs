@@ -1,19 +1,58 @@
-// options1.rs
+// quiz3.rs
 //
-// Execute `rustlings hint options1` or use the `hint` watch subcommand for a
-// hint.
+// This quiz tests:
+// - Generics
+// - Traits
+//
+// An imaginary magical school has a new report card generation system written
+// in Rust! Currently the system only supports creating report cards where the
+// student's grade is represented numerically (e.g. 1.0 -> 5.5). However, the
+// school also issues alphabetical grades (A+ -> F-) and needs to be able to
+// print both types of report card!
+//
+// Make the necessary code changes in the struct ReportCard and the impl block
+// to support alphabetical report cards. Change the Grade in the second test to
+// "A+" to show that your changes allow alphabetical grades.
+//
+// Execute rustlings hint quiz3 or use the hint watch subcommand for a hint.
 
-// I AM NOT DONE
 
-// This function returns how much icecream there is left in the fridge.
-// If it's before 10PM, there's 5 pieces left. At 10PM, someone eats them
-// all, so there'll be no more left :(
-fn maybe_icecream(time_of_day: u16) -> Option<u16> {
-    // We use the 24-hour system here, so 10PM is a value of 22 and 12AM is a
-    // value of 0 The Option output should gracefully handle cases where
-    // time_of_day > 23.
-    // TODO: Complete the function body - remember to return an Option!
-    ???
+// Define a ReportCard struct with a generic grade field
+pub struct ReportCard<T> {
+    pub grade: T,
+    pub student_name: String,
+    pub student_age: u8,
+}
+
+// Define a trait that standardizes how to display the grade
+pub trait GradeDisplay {
+    fn display(&self) -> String;
+}
+
+// Implement GradeDisplay for f32 (numeric grades)
+impl GradeDisplay for f32 {
+    fn display(&self) -> String {
+        format!("{}", self) // Simply format the float
+    }
+}
+
+// Implement GradeDisplay for String (alphabetic grades)
+impl GradeDisplay for String {
+    fn display(&self) -> String {
+        self.clone() // Just return the grade as is (clone for String)
+    }
+}
+
+// Implement the ReportCard's print method for any type that implements GradeDisplay
+impl<T: GradeDisplay> ReportCard<T> {
+    pub fn print(&self) -> String {
+        format!(
+            "{} ({}) - achieved a grade of {}",
+            &self.student_name,
+            &self.student_age,
+            self.grade.display()
+        )
+    }
 }
 
 #[cfg(test)]
@@ -21,19 +60,28 @@ mod tests {
     use super::*;
 
     #[test]
-    fn check_icecream() {
-        assert_eq!(maybe_icecream(9), Some(5));
-        assert_eq!(maybe_icecream(10), Some(5));
-        assert_eq!(maybe_icecream(23), Some(0));
-        assert_eq!(maybe_icecream(22), Some(0));
-        assert_eq!(maybe_icecream(25), None);
+    fn generate_numeric_report_card() {
+        let report_card = ReportCard {
+            grade: 2.1,
+            student_name: "Tom Wriggle".to_string(),
+            student_age: 12,
+        };
+        assert_eq!(
+            report_card.print(),
+            "Tom Wriggle (12) - achieved a grade of 2.1"
+        );
     }
 
     #[test]
-    fn raw_value() {
-        // TODO: Fix this test. How do you get at the value contained in the
-        // Option?
-        let icecreams = maybe_icecream(12);
-        assert_eq!(icecreams, 5);
+    fn generate_alphabetic_report_card() {
+        let report_card = ReportCard {
+            grade: "A+".to_string(),
+            student_name: "Gary Plotter".to_string(),
+            student_age: 11,
+        };
+        assert_eq!(
+            report_card.print(),
+            "Gary Plotter (11) - achieved a grade of A+"
+        );
     }
 }
